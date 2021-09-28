@@ -18,6 +18,8 @@ data PP = I | T PP
 
 -- Rational numbers
 data QQ =  QQ II PP
+    deriving (Eq,Show) -- for equality and printing
+
 
 
 
@@ -79,13 +81,22 @@ multP (T n) m = addP (multP n m) m
 ii_pp :: PP -> II
 ii_pp I = II (S O) O
 ii_pp (T n) = addI (II (S O) O) (ii_pp n)
+
+
+-- Addition: (a/b)+(c/d)=(ad+bc)/(bd)
+addQ :: QQ -> QQ -> QQ
+addQ (QQ a b) (QQ c d) = QQ (addI (multI a (ii_pp d)) (multI (ii_pp b) c)) (multP b d)
+
+-- Multiplication: (a/b)*(c/d)=(ac)/(bd)
+multQ :: QQ -> QQ -> QQ
+multQ (QQ a b) (QQ c d) = QQ (multI a c) (multP b d)
 ----------------
 -- Normalisation
 ----------------
 
 normalizeI :: II -> II
-normalizeI (II (S m) O) = II (S m) O 
-normalizeI (II O (S n)) = II O (S n) 
+normalizeI (II m O) = II m O 
+normalizeI (II O n) = II O n
 normalizeI (II (S m) (S n)) = normalizeI (II m n)
 
 ----------------------------------------------------
@@ -93,20 +104,35 @@ normalizeI (II (S m) (S n)) = normalizeI (II m n)
 ----------------------------------------------------
 
 -- Precondition: Inputs are non-negative
--- nn_int :: Integer -> NN
+nn_int :: Integer -> NN
+nn_int 0 = O 
+nn_int m = S (nn_int (m-1))
 
--- int_nn :: NN->Integer
+int_nn :: NN->Integer
+int_nn O = 0
+int_nn (S n) = 1 + (int_nn n)
 
--- ii_int :: Integer -> II
+ii_int :: Integer -> II
+ii_int 0 = (II O O)
+ii_int m = addI (II (S O) O) (ii_int (m-1))
 
--- int_ii :: II -> Integer
+int_ii :: II -> Integer
+int_ii (II m O) = int_nn m
+int_ii (II m (S n)) = (int_ii (II m n)) - 1
+
 
 -- -- Precondition: Inputs are positive
--- pp_int :: Integer -> PP
+pp_int :: Integer -> PP
+pp_int 1 = I
+pp_int m = T (pp_int (m - 1))
 
--- int_pp :: PP->Integer
 
--- float_qq :: QQ -> Float
+int_pp :: PP->Integer
+int_pp I = 1
+int_pp (T n) = 1 + (int_pp n)
+
+float_qq :: QQ -> Float
+float_qq (QQ a b) = (fromIntegral( int_ii a)) / (fromIntegral( int_pp b))
 
 ----------
 -- Testing
@@ -148,3 +174,22 @@ main = do
 
     print $ "convert PP -> II: I -> II (S O) O"
     print $ ii_pp (I)
+
+    print $ "addQ"
+    print $ "1/3 + 1/3 = 2/3"
+    print $ addQ (QQ (II (S O) O) (T (T I)))  (QQ (II (S O) O) (T (T I)))
+
+    print $ "multQ"
+    print $ "1/3 * 1/3 = 1/9"
+    print $ multQ (QQ (II (S O) O) (T (T I)))  (QQ (II (S O) O) (T (T I)))
+
+
+    print $ "CONVERSIONS FROM integer-> NN"
+    print $ nn_int 4
+    print $ "CONVERSIONS FROM NN-> integer"
+    print $ int_nn (S (S (S O)))
+    print $ "CONVERSIONS FROM integer-> II"
+    print $ ii_int 3
+
+    print $ "CONVERSIONS FROM II-> integer"
+    print $ int_ii (II (S (S (S O))) (S O))
