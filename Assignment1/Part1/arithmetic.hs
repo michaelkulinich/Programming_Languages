@@ -133,6 +133,9 @@ int_pp (T n) = 1 + (int_pp n)
 
 float_qq :: QQ -> Float
 float_qq (QQ a b) = (fromIntegral( int_ii a)) / (fromIntegral( int_pp b))
+-- Found from integral on https://stackoverflow.com/questions/10303251/haskell-converting-int-to-float
+-- This allowed us to convert to float as our results were coming out as Integers
+
 
 ----------
 -- Testing
@@ -190,6 +193,17 @@ main = do
     print $ int_nn (S (S (S O)))
     print $ "CONVERSIONS FROM integer-> II"
     print $ ii_int 3
+
+    print $ "CONVERSIONS FROM Integer -> PP"
+    print $ 2
+    print $ pp_int 3
+    print $ "CONVERSIONS FROM PP -> Integer"
+    print $ "3"
+    print $ int_pp (T(T I))
+    print $ "CONVERSIONS FROM QQ -> Float"
+    print $ "1/4 = 0.25"
+    print $ float_qq (QQ (II (S O) O)  (T (T (T I))))
+
 
     print $ "CONVERSIONS FROM II-> integer"
     print $ int_ii (II (S (S (S O))) (S O))
