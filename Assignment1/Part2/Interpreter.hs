@@ -10,3 +10,5 @@ eval (Times n m) = (eval n) * (eval m)
 
 eval (Divide n m) = (eval n) / (eval m)
 eval (Mod n m) = (eval n) % (eval m)
+eval (Pow n m) = (eval n) ^ (eval m)
+eval (Unary n) = - eval(n)
