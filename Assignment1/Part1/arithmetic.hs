@@ -136,18 +136,31 @@ float_qq (QQ a b) = (fromIntegral( int_ii a)) / (fromIntegral( int_pp b))
 -- Found from integral on https://stackoverflow.com/questions/10303251/haskell-converting-int-to-float
 -- This allowed us to convert to float as our results were coming out as Integers
 
+------------------------------
+-- Normalisation by Evaluation
+------------------------------
 
+nbv :: II -> II
+nbv m = ii_int (int_ii m)
 ----------
 -- Testing
 ----------
 main = do
-    -- print $ addN (S (S O)) (S O)
-    -- print $ multN (S (S O)) (S (S (S O)))
+
     -- Integers: (II i j) represents i-j, (II k l) represents k-l
     let i = 4
     let j = 2
     let k = 1
     let l = 3
+    print $ int_ii (addI (II (nn_int i) (nn_int j)) (II (nn_int k) (nn_int l)))
+    print $ int_ii (multI (II (nn_int i) (nn_int j)) (II (nn_int k) (nn_int l)))
+    -- Fractions: (QQ i j) represents i/j, (QQ k l) represents k/l
+    print $ float_qq (addQ (QQ (ii_int i) (pp_int j)) (QQ (ii_int k) (pp_int l)))
+    print $ float_qq (multQ (QQ (ii_int i) (pp_int j)) (QQ (ii_int k) (pp_int l)))
+    -- Normalisation (recursive definition)
+    print $ normalizeI (II (nn_int i) (nn_int j))
+    -- Normalisation (by evaluation)
+    print $ nbv (II (nn_int i) (nn_int j))
 
 
     -- addP
