@@ -1,0 +1,327 @@
+\documentclass{article}
+
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fullpage}
+\usepackage[usenames]{color}
+\usepackage{float}
+\usepackage{hyperref}
+  \hypersetup{
+    colorlinks = true,
+    urlcolor = blue,       % color of external links using \href
+    linkcolor= blue,       % color of internal links 
+    citecolor= blue,       % color of links to bibliography
+    filecolor= blue,        % color of file links
+    }
+    
+\usepackage{listings}
+\usepackage{lipsum}
+\newenvironment{blockquote}{%
+  \par%
+  \medskip
+  \leftskip=4em\rightskip=2em%
+  \noindent\ignorespaces}{%
+  \par\medskip}
+
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{frame=tb,
+  language=haskell,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
+
+\title{Lazy Evaluation in Haskell}
+\author{Michael Kulinich  \\ Chapman University}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Abstract  (take out any instructional info from here and put it into the introduction.
+Many modern day programmers generally prefer programming in imperative languages such as Python, C, or C++. After learning how to use one language effectively, one can swiftly start working with other languages because the thought process and method of answering problems is very similar. The key is that imperative languages are usually composed of statements and expressions. An expression such as “5 * 2” is evaluated and modifies memory via an assignment operator to create a value. On the other hand, statements are units of execution such as conditionals and loops that do not return values, but compute by using side effects. A sequence of statements determine how to answer a certain problem. Little do they know that there actually exists another paradigm known as functional programming in which the goal is to bind everything in clean mathematical functions similar to what one would see in a mathematics course. In this way, programs are built solely from function application and evaluation. Then to break it down even more, in languages such as Haskell, everything is an expression, and the goal is to evaluate them in order to solve a problem. In this paper we will observe and analyze the two strategies for evaluating these expressions. Starting your career purely coding these kind of languages makes your mind only think in one specific way therefore I believe that learning how to use purely functional languages
+\ldots 
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}\label{intro}
+
+Replace Section~\ref{intro} with your own short introduction. 
+
+\subsection{General Remarks}
+
+For this paper, I will assume that the reader has a basic familiarity with Haskell, but if you are new to Haskell, that is not a problem. I will try to explain everything as clear as possible and work with simple examples. The first step before I get into anything is to make sure that you at least have Haskell installed. Haskell can be downloaded using the instructions from \href{https://hackmd.io/@alexhkurz/Hk86XnCzD}{here}. Assuming everything installs smoothly, we can get started, but for any problems be sure to check out this \href{https://www.haskell.org/platform/}{website}.
+
+
+
+\subsection{Imperative and Functional Languages}
+
+I start a new subsection, so that you can see how it appears in the table of contents.
+
+\begin{itemize}
+\item This is how you itemize in LaTeX.
+\item I think a good way to learn LaTeX is by starting from this template file and build it up step by step. Often stackoverflow will answer your questions. But here are a few resources:
+  \begin{enumerate}
+  \item \href{https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes}{Learn LaTeX in 30 minutes}
+  \item \href{https://www.latex-project.org/}{LaTeX – A document preparation system}\end{enumerate}
+\end{itemize}
+
+\subsection{Key Points}
+Put simply, Haskell is lazy. It won’t execute functions and calculate things until it’s really forced to show you a result \cite{LYAH}. This strategy is known as lazy evaluation and by default, Haskell uses lazy evaluation to evaluate expressions.
+The goal of this paper is to understand what lazy evaluation really is, what makes Haskell lazy, and the advantages of this evaluation strategy. First we will need to do a quick dive into Lambda Calculus because it is the building block of purely function programming. Then, we will use Lambda calculus as the key to understand the difference between two evaluation strategies for reducible expressions (redex). Finally, building upon these foundations, we will work on several examples of lazy evaluation.
+
+
+\section{Lambda Calculus}
+
+Before getting into how lazy evaluation is used in Haskell and its advantages, we first need to understand the idea behind lambda calculus. The motivation for looking at lambda calculus is because it elegantly demonstrates how expression evaluation can simply be seen as a sequence of reduction steps. This is also popularly known as rewriting, where we reduce/rewrite an expression into a simpler/shorter form. This process is repeated by any number of steps until we reach the normal form. An expression is in normal form when it cannot be reduced anymore. More concretely, a lambda expression is in normal form if it contains no more possible redexes. We will see how lambda expressions open up to two potential methods of expression evaluation: Normal-order evaluation and applicative-order evaluation.
+
+\subsection{What is Lambda Calculus?}
+Lambda calculus, also denoted as $\lambda$-calculus, is a convenient notation for functions and applications. What is a function? In mathematics, a function is something that relates an input to output. Say we want to write a function that squares an input, we can do this by $f(x) = {x}^2$. $f$ is the function name, $x$ is just an placeholder for the input, then ${x}^2$ is what we need to output. Now lets look at some examples of function in programming languages.In python, a similar function is written as
+\begin{figure}[!htb]
+    \begin{lstlisting}
+def square(x):
+    return x*x
+    \end{lstlisting}
+    \vspace{-1.5em}
+
+    \caption{\textit{A python function that squares an input}}
+\end{figure}
+
+\medskip\noindent
+Similarly, we can create a function that does the same thing in Haskell
+
+\begin{figure}[H]
+    \begin{lstlisting}
+square :: Int -> Int
+square x = x*x
+    \end{lstlisting}
+    \vspace{-1.5em}
+    \caption{\textit{A Haskell function that squares an input}}
+\end{figure}
+
+\begin{blockquote}
+\medskip\noindent
+\textbf{Remark:} Before getting into it, lets go over this Haskell code first. The purpose of the first line $$\textrm{square :: Int} \rightarrow \textrm{Int}$$ is to give our function \textit{square} an explicit type declaration. The $::$ symbol is read as "has type of". Then the first parameter is the argument type that gets passed into our function, which in this case is an \textit{Int}. The next parameter is the "return type" of the function, which in this case is also an \textit{Int}. Without going into more advanced detail, there is no special distinction between the parameters and the return type \cite{LYAH}. Therefore , the function type declaration can be read as: \textit{function square takes in an argument of type Int for the and outputs an Int}. Declaring the types for your functions is not necessary, but it makes your code easier to read and understand. Also, I chose the argument to be of type \textit{Int} just for demonstrations purposes. I could have chosen another type such as \textit{float}. For more references about various types in Haskell, check out \href{https://www.tutorialspoint.com/haskell/haskell_types_and_type_class.htm}{Tutorials Point}. 
+
+\medskip\noindent
+The second line  $$\textrm{square x = x*x}$$ is the function definition. We define a function \textit{square} that takes an argument \textit{n} and returns the square of that number, \textit{n*n}.
+
+\end{blockquote}
+\medskip\noindent
+In both languages, the function is given a name, \textit{square}. Both functions take in an input which we call $x$, but this variable name is just a placeholder and we can realistically call it whatever we want and the function will not change.
+\medskip\noindent
+Now to apply a value to compute with the function, in Haskell we can say: \textit{square 5 reduces to 5}. We will use this notation: $$\textrm{square}\;5 \rightarrow 25$$
+
+\medskip\noindent
+Here , we are merely substituting 5 for variable x in function square. You might be wondering, why I am going over such simple high school algebra? Well to understand lambda calculus, we had to break down the basic components of a function. The main difference between what we’ve just seen and $\lambda$-calculus is that we can write functions without giving them explicit names, but the idea of applying a function to an argument and forming functions by abstraction still holds. Woah, that was a lot, let’s see how this same function can be expressed in terms of $\lambda$-calculus by breaking down a quick example. 
+\begin{align*}
+(\lambda x.x*x ) 5 &=5*5  \quad [reduction] \\
+&=25 \\
+\end{align*}
+In this examples, abstraction serves as the square function, represented by $\lambda x.x*x$ and the application is represented by applying the function  $\lambda x.x*x$ to the argument $5$. In essence, we are substituting every occurrence of x with 5 in the lambda term. What is this computation of reduction more specifically? Let’s define this as the $\beta$-reduction rule.
+
+
+
+\subsection{$\beta$-Reduction Rule}
+Let’s look at the general definition for reducing lambda expressions.
+
+\begin{itemize}
+\item \textbf{$\beta$-reduction rule} If $\lambda$x.M is a lambda term and N is another lambda term, then $(\lambda x.M ) N  \rightarrow M[N/x]$
+that for the term M, each occurrence of x is substituted by N. 
+\end{itemize}
+This idea of using substitution to reduce an expression, is very fundamental in lambda calculus and the theoretical building blocks of functional programming. As stated earlier, we use the $\beta$-reduction rule until we read normal form where we cannot reduce the redex any further. 
+
+\section{Reduction Strategies}
+Reduction strategies can also be thought of as evaluation strategies. This implies that at each step during expression evaluation unless we are in normal form, there may be an expression we can reduce ti by applying a reduction definition. Let’s look at a lambda expression that will apply a lambda term to another lambda term. $(\lambda x.x) ((\lambda y.y) a)$. This expression can be reduced with two possible strategies. 
+\begin{figure}[!htb]
+$$(\lambda x.x) ((\lambda y.y) a)$$
+$$\swarrow \quad \searrow$$
+$$(\lambda y.y)a \quad \textrm{or} \quad (\lambda x.x)a$$
+$$\searrow \quad \swarrow$$
+$$a$$
+ \caption{\textit{Possible Reduction Strategies}}
+ \label{fig:my_label}
+
+\end{figure}
+
+\medskip\noindent On the right-hand branch, we are evaluating the second lambda term $$(\lambda y.y)a \rightarrow  a$$ Then we apply this result, $a$ into $$\lambda x.x$$ in order to evaluate to the final form $a$. In programming, this method of evaluation is known as \textit{call by value}, and more generally as “innermost reduction” or “applicative-order reduction”.
+\newline
+\newline On the left-hand branch, we are evaluating the first lambda term by substituting the whole right lambda term. We are basically replacing the variable x in $$\lambda x.x$$ with the lambda term $$(\lambda y.y)a$$ In programming, this method of evaluation is known as \textit{call by name}, and more generally it is known as “outermost reduction” or “normal-order reduction.” This strategy of evaluation is what we are more interested in because this is the essential idea behind lazy evaluation in Haskell.
+
+\subsection{Outermost Reduction Rule}
+\medskip\noindent
+I like to think of this rule as the “outermost reduction rule” instead of the “normal-order reduction rule” because innermost reduction is more conceptual. As previously mentioned, a redex is a reducible expression. So if we have an expression composed of two or more redexes, we reduce the leftmost first before reducing the sub-expressions inside of it. This can be seen in the example we had above where we have two possible redexes: $$(\lambda x.x) ((\lambda y.y) a)$$
+For outermost reduction, we reduced the leftmost redex $(\lambda x.x)$ by applying/substituting the innermost redex $(\lambda y.y)a$ into the outermost redex. Furthermore, we are delaying the evaluation of the innermost redex (argument for the outermost redex) until we actually need to compute the expression. Functional languages such as Haskell follow this evaluation strategy. This makes Haskell lazy because it does not compute the argument until it finally has to.
+
+
+\subsection{Innermost Reduction Rule}
+\medskip\noindent
+Innermost reduction (applicative-order reduction) is basically the opposite of outermost reduction. The innermost redex is reduced first, so essentially function arguments are evaluated first before they are substituted into the function. Functions in languages most imperative languages such as python and C/C++ follow this strategy. 
+
+
+\subsection{Comparing Both Reduction Rules}
+\medskip\noindent
+Lets look at an example in Haskell demonstrating these two different possibilities of evaluation. We are going to compute  ${(2+3)}^2$ using a Haskell function name \textit{square}
+
+\begin{lstlisting}
+-- square an int
+square :: Int -> Int
+square n = n * n
+\end{lstlisting}
+\noindent\begin{align*}
+&\textbf{Outermost}  &  &\textbf{Innermost}  \\
+&square (2+3)   &   &square (2+3)  \\
+&=(2+3)*(2+3)   &   &=square (5)\\
+&=5 * (2+3)   &    &=5 * 5  \\
+&=5 * 5   &    &=25 \\
+&=25   
+\end{align*}
+
+\medskip\noindent
+Now lets look at the first column with outermost evaluation. In this method, we delay the evaluation of the argument. Instead, we reduce the outermost redex, which is the \textit{square} abstraction. Following the definition of \textit{square} above, we substitute $(2+3)$ into the variable $n$, then perform the squaring step of $n*n$
+
+\medskip\noindent
+New lets observe the second column with innermost evaluation. In this method, we do not delay the evaluation of the argument. The first step in fact is to compute the expression $(2+3)$. Basically, the argument is reduced before it is substituted into the function. This sort of reduction is what most programmers are used to. It is intuitive and generally preferred. 
+
+\medskip\noindent
+How can we compare the two methods? The first thing we can notice is that both strategies end up with the same result. This is an important note to make because in functional programming, if there are no side effects, we are guaranteed to end up with the same results from both evaluation methods. Also we can see that innermost evaluation reduces the entire expression in the three steps, compared to the four steps taken by outermost reduction. In outermost reduction, we can see that we end up having to reduce the same expression $(2+3)$ on two separate occasions. That being said, it seems like innermost evaluation is more efficient and doesn't duplicate expressions. 
+
+\medskip\noindent
+Up until now, I have been building up a connection between outermost reduction and lazy evaluation. The two really sound the same right? Earlier I said that languages such as Haskell that default to lazy evaluation, do not compute function arguments before invocation. This sounds almost exactly the same as the strategy of outermost or normal-order expression evaluation. So this raises the question, if outermost evaluation is more inefficient because it needs to reduce the same, duplicate expression multiple times, then why should we care about it or lazy evaluation? Have I been wasting your time talking about lazy evaluation? The short answer is no... We have been building up how outermost reduction is essentially lazy evaluation, however, we are missing an extra ingredient. This ingredient is known as argument sharing or memoization. Argument sharing stores a value of a function to prevent re-computation. This is an essential ingredient for lazy evaluation because lazy evaluation avoids repeated evaluation. 
+
+
+
+\section{Lazy Evaluation}
+
+First lets look at the example in the previous section and incorporate argument sharing. \noindent\begin{align*}
+&\textbf{Outermost}  \\
+&square (2+3)  \\
+&=(2+3)*(2+3) \\
+&=5 * 5   \\
+&=25   
+\end{align*}
+
+\medskip\noindent
+The example of reductions doesn't perfectly illustrate how re-computation is prevented, but I will try to clarify it. The important difference is found on the 2nd step. Unlike the outermost reduction example in the previous section, once we compute the first $(2+3)$ expression, we can automatically reduce both occurrences of the expression in one step. As a result, we have fully reduced the expression in the same number of steps as inner reduction.
+
+\subsection{What is Lazy Evaluation?}
+
+\medskip\noindent
+Lazy evaluation can be thought of as outermost reduction + argument sharing. Thus by combining these two things, lazy evaluation is an evaluation strategy which holds of evaluation of an expression until its value is needed and it avoids repeated evaluation \cite{TP}. With lazy evaluation, Haskell evaluates a value when it is needed then updates all copies of that expression with the new value. 
+
+
+\subsection{How is Haskell Lazy and What Are The Advantages?}
+
+\medskip\noindent
+The first advantage of lazy evaluation in Haskell is that expressions are computed only if there value is absolutely necessary. Lets look at a couple examples regarding this point. We will create a similar function in Python and in Haskell to demonstrate this advantage. The first function takes in two arguments and just returns the first one. First we will look at the python code
+\begin{figure}[H]
+    \begin{lstlisting}
+def func(x, y):
+    return x
+    \end{lstlisting}
+    \vspace{-1.5em}
+
+    \caption{\textit{A python function that returns the first argument}}
+\end{figure}
+
+\medskip\noindent
+Now lets write the same function in Haskell:
+
+\begin{figure}[H]
+    \begin{lstlisting}
+func :: Int -> Int -> Int
+func x y = x
+    \end{lstlisting}
+    \vspace{-1.5em}
+
+    \caption{\textit{A Haskell function that returns the first argument}}
+\end{figure}
+
+\medskip\noindent
+Both function take in two arguments and return the first one. Pretty simple right? It seems as if the function in both languages will always return the same thing, but it turns out they don't. 
+
+\medskip\noindent
+For example, lets set our arguments to these values $$x = 5$$ $$y = (5/0)$$ Then lets run both function as see what we get. First lets try Python
+
+\begin{figure}[H]
+    \begin{lstlisting}
+>>> def func(x, y):
+...     return x
+... 
+>>> func(5, 5/0)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ZeroDivisionError: division by zero
+    \end{lstlisting}
+    \vspace{-1.5em}
+    \caption{\textit{Division by zero error in Python}}
+\end{figure}
+
+\medskip\noindent
+Oh no! What happened here? If you are an experienced programmer, you would no that the result of dividing anything by 0 is undefined, and thus printing an error. What we did was pass $(5/0)$ as the argument for y, and since uses applicative/innermost reduction, it first computes the value of the argument before passing it into the function body. Thus, it computes $(5/0)$ and throws an error before we ever get into the actual function. 
+
+\medskip\noindent
+Lets now try the same function in Haskell! \footnote{If you installed Haskell properly, you can open up an interactive environment that runs Haskell code}
+
+\begin{figure}[H]
+    \begin{lstlisting}
+Prelude> func x y = x
+Prelude> func 5 (5/0)
+5
+    \end{lstlisting}
+    \vspace{-1.5em}
+    \caption{\textit{Lazy Evaluation example in Haskell with no division by zero error}}
+\end{figure}
+
+\medskip\noindent
+WOAH! It works like magic! Why did this not result in 
+
+
+
+
+
+\medskip\noindent
+The second advantage of lazy evaluation in Haskell is that it promises termination whenever possible
+
+
+
+
+
+
+sdf
+
+\section{Project}
+
+In this section you will describe a short project. It can either be in Haskell or of a theoretical nature,
+
+\section{Conclusions}\label{conclusions}
+Short conclusion. 
+
+\begin{thebibliography}{99}
+\bibitem[PL]{PL} \href{https://github.com/alexhkurz/programming-languages-2021/blob/main/README.md}{Programming Languages 2021}, Chapman University, 2021.
+\bibitem[LYAH]{LYAH} \href{http://learnyouahaskell.com/chapters}{Learnyouahaskell.com}
+\bibitem[TP]{TP} \href{https://www.tutorialspoint.com/haskell/haskell_types_and_type_class.htm}{tutorialspoint.com}
+\end{thebibliography}
+
+\end{document}
