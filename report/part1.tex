@@ -51,15 +51,14 @@
 \title{Lazy Evaluation in Haskell}
 \author{Michael Kulinich  \\ Chapman University}
 
-\date{\today}
+\date{October 17, 2021}
 
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-Abstract  (take out any instructional info from here and put it into the introduction.
-Many modern day programmers generally prefer programming in imperative languages such as Python, C, or C++. After learning how to use one language effectively, one can swiftly start working with other languages because the thought process and method of answering problems is very similar. The key is that imperative languages are usually composed of statements and expressions. An expression such as “5 * 2” is evaluated and modifies memory via an assignment operator to create a value. On the other hand, statements are units of execution such as conditionals and loops that do not return values, but compute by using side effects. A sequence of statements determine how to answer a certain problem. Little do they know that there actually exists another paradigm known as functional programming in which the goal is to bind everything in clean mathematical functions similar to what one would see in a mathematics course. In this way, programs are built solely from function application and evaluation. Then to break it down even more, in languages such as Haskell, everything is an expression, and the goal is to evaluate them in order to solve a problem. In this paper we will observe and analyze the two strategies for evaluating these expressions. Starting your career purely coding these kind of languages makes your mind only think in one specific way therefore I believe that learning how to use purely functional languages
+Many modern-day programmers generally prefer programming in imperative languages such as Python, C, or C++. After learning how to use one language effectively, one can swiftly start working with other languages because the thought process and method of answering problems are very similar. Little do they know that there actually exists another paradigm known as functional programming in which the goal is to bind everything in clean mathematical functions similar to what one would see in a mathematics course. In this way, programs are built solely from function application and evaluation. Then to break it down even more, in languages such as Haskell, everything is an expression, and the goal is to evaluate them in order to solve a problem. In this paper, we will observe and analyze the strategies for evaluating these expressions.
 \ldots 
 \end{abstract}
 
@@ -67,30 +66,26 @@ Many modern day programmers generally prefer programming in imperative languages
 
 \section{Introduction}\label{intro}
 
-Replace Section~\ref{intro} with your own short introduction. 
-
 \subsection{General Remarks}
 
-For this paper, I will assume that the reader has a basic familiarity with Haskell, but if you are new to Haskell, that is not a problem. I will try to explain everything as clear as possible and work with simple examples. The first step before I get into anything is to make sure that you at least have Haskell installed. Haskell can be downloaded using the instructions from \href{https://hackmd.io/@alexhkurz/Hk86XnCzD}{here}. Assuming everything installs smoothly, we can get started, but for any problems be sure to check out this \href{https://www.haskell.org/platform/}{website}.
+For this paper, I will assume that the reader has a basic familiarity with Haskell, but if you are new to Haskell, that is not a problem. I will try to explain everything as clear as possible and work with simple examples. The first step before I get into anything is to make sure that you at least have Haskell installed. Haskell can be downloaded using the instructions from \href{https://hackmd.io/@alexhkurz/Hk86XnCzD}{here}. Assuming everything installs smoothly, we can get started, but for any problems be sure to check out this \href{https://www.haskell.org/platform/}{website}. In this paper, we will also be using GHCI to create interactive environments to run Haskell functions. To familiarize yourself with GHCI, I recommend looking at this \href{https://downloads.haskell.org/~ghc/9.0.1/docs/html/users_guide/ghci.html}{website}
 
-
-
-\subsection{Imperative and Functional Languages}
-
-I start a new subsection, so that you can see how it appears in the table of contents.
-
-\begin{itemize}
-\item This is how you itemize in LaTeX.
-\item I think a good way to learn LaTeX is by starting from this template file and build it up step by step. Often stackoverflow will answer your questions. But here are a few resources:
-  \begin{enumerate}
-  \item \href{https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes}{Learn LaTeX in 30 minutes}
-  \item \href{https://www.latex-project.org/}{LaTeX – A document preparation system}\end{enumerate}
-\end{itemize}
 
 \subsection{Key Points}
-Put simply, Haskell is lazy. It won’t execute functions and calculate things until it’s really forced to show you a result \cite{LYAH}. This strategy is known as lazy evaluation and by default, Haskell uses lazy evaluation to evaluate expressions.
-The goal of this paper is to understand what lazy evaluation really is, what makes Haskell lazy, and the advantages of this evaluation strategy. First we will need to do a quick dive into Lambda Calculus because it is the building block of purely function programming. Then, we will use Lambda calculus as the key to understand the difference between two evaluation strategies for reducible expressions (redex). Finally, building upon these foundations, we will work on several examples of lazy evaluation.
 
+\medskip\noindent
+Imperative languages are usually composed of statements and expressions. An expression such as “5 * 2” is evaluated and modifies memory via an assignment operator to create a value. Expressions are entities that can be reduced into a value. On the other hand, statements are units of execution such as conditionals and loops that do not return values but compute by using side effects. A sequence of statements determines how to answer a certain problem. Functional languages, on the other hand, have programs that are built solely from function application and evaluation. In languages such as Haskell, everything is an expression, and the goal is to evaluate them in order to solve a problem. Haskell defaults to a method of evaluation known as lazy evaluation. Put simply, Haskell is lazy. It won’t execute functions and calculate things until it’s really forced to show you a result \cite{LYAH}. Haskell uses lazy evaluation to evaluate expressions because it comes with several advantages. 
+
+\begin{itemize}
+    \item Function arguments are not computed before invocation
+    \item Expressions are computed only if their value is necessary and it avoids repeated evaluation of expressions, thus making algorithms more efficient and reducing computation complexity
+    \item Allows the ability to program with infinite lists
+    \item Promises termination when possible  
+
+\end{itemize}
+
+\medskip\noindent
+The goal of this paper is to understand what lazy evaluation really is, what makes Haskell lazy, and the advantages of this evaluation strategy. First, we will need to do a quick dive into Lambda Calculus because it is the building block of purely functional programming. Then, we will use Lambda calculus as the key to understanding the difference between two evaluation strategies for reducible expressions (redex). Finally, building upon these foundations, we will work on several examples of lazy evaluation. 
 
 \section{Lambda Calculus}
 
@@ -103,8 +98,6 @@ Lambda calculus, also denoted as $\lambda$-calculus, is a convenient notation fo
 def square(x):
     return x*x
     \end{lstlisting}
-    \vspace{-1.5em}
-
     \caption{\textit{A python function that squares an input}}
 \end{figure}
 
@@ -116,7 +109,6 @@ Similarly, we can create a function that does the same thing in Haskell
 square :: Int -> Int
 square x = x*x
     \end{lstlisting}
-    \vspace{-1.5em}
     \caption{\textit{A Haskell function that squares an input}}
 \end{figure}
 
@@ -234,7 +226,7 @@ Lazy evaluation can be thought of as outermost reduction + argument sharing. Thu
 \subsection{How is Haskell Lazy and What Are The Advantages?}
 
 \medskip\noindent
-The first advantage of lazy evaluation in Haskell is that expressions are computed only if there value is absolutely necessary. Lets look at a couple examples regarding this point. We will create a similar function in Python and in Haskell to demonstrate this advantage. The first function takes in two arguments and just returns the first one. First we will look at the python code
+The first advantage of lazy evaluation in Haskell is that expressions are computed only if their value is  necessary in this context. Lets look at a couple examples regarding this point. We will create a similar function in Python and in Haskell to demonstrate this advantage. The first function takes in two arguments and just returns the first one. First we will look at the python code
 \begin{figure}[H]
     \begin{lstlisting}
 def func(x, y):
@@ -253,13 +245,11 @@ Now lets write the same function in Haskell:
 func :: Int -> Int -> Int
 func x y = x
     \end{lstlisting}
-    \vspace{-1.5em}
-
     \caption{\textit{A Haskell function that returns the first argument}}
 \end{figure}
 
 \medskip\noindent
-Both function take in two arguments and return the first one. Pretty simple right? It seems as if the function in both languages will always return the same thing, but it turns out they don't. 
+Both functions take in two arguments and return the first one. Pretty simple right? It seems as if the function in both languages will always return the same thing, but it turns out they don't. 
 
 \medskip\noindent
 For example, lets set our arguments to these values $$x = 5$$ $$y = (5/0)$$ Then lets run both function as see what we get. First lets try Python
@@ -274,7 +264,6 @@ Traceback (most recent call last):
   File "<stdin>", line 1, in <module>
 ZeroDivisionError: division by zero
     \end{lstlisting}
-    \vspace{-1.5em}
     \caption{\textit{Division by zero error in Python}}
 \end{figure}
 
@@ -290,38 +279,57 @@ Prelude> func x y = x
 Prelude> func 5 (5/0)
 5
     \end{lstlisting}
-    \vspace{-1.5em}
     \caption{\textit{Lazy Evaluation example in Haskell with no division by zero error}}
 \end{figure}
 
 \medskip\noindent
-WOAH! It works like magic! Why did this not result in 
+WOAH! It works like magic! Why did this not result in a divide by zero error? The reasoning is that in lazy evaluation, the computation of arguments is delayed. Also, expressions are evaluated only if there value is necessary. Turns out that the second argument never got evaluated, since it was not needed in the function body! This example is very basic and simple, but it demonstrates how only necessary expressions are evaluated. This can significantly reduce the time complexity of an algorithm because it won't do unnecessary work. This can be further demonstrated by the next example
 
-
-
-
+\begin{figure}[H]
+    \begin{lstlisting}
+func :: Int -> Int -> Int
+func x y 
+    | x < 10 = x
+    | otherwise = y
+    \end{lstlisting}
+    \caption{\textit{Lazy Evaluation example in Haskell}}
+\end{figure}
 
 \medskip\noindent
-The second advantage of lazy evaluation in Haskell is that it promises termination whenever possible
+Now, the function body consists of a notation that we haven't seen before, lets break it down before we analyze what this function does. The pipe characters, $|$ are known as guards. Guards are a way to see whether some expression is true or false. If its true, then the function will return whatever is on the right of the equals sign. It is very similar to if-else statements. Check out this \href{http://learnyouahaskell.com/syntax-in-functions#guards-guards}{website} for more information about guards. So now we can see that this function takes in two integer arguments, then checks to see if the first argument is less than 10; if it is, then it returns the first argument. If the first argument is greater then 10, then it will return the second argument. Lets try this function with various inputs. $$a = sum [1,2,3]$$ $$b = sum [1..]$$ Sum is a built in Haskell function that sums of the values in a list. The second list includes two dots ($..$) which creates an infinite list from $1 \rightarrow \infty$. (Side note, thanks to lazy evaluation, Haskell lists can be infinite)
 
+\medskip\noindent
+Ok, now when we pass these arguments to the function $a \rightarrow x$  $b \rightarrow y$. The function returns 6 almost instantly. Again, since the first argument x is less than 10, we did not have to compute the second argument. The second argument is the sum of an infinite list which is impossible to compute. The function would have never terminated if it wasn't for lazy evaluation. Lets see what happens when we swap arguments $$a = sum [1..9999999]$$ $$b = sum [1,2]$$ In this case however, we are not summing from $1 \rightarrow \infty$ but instead, to an arbitrarily large number. After running this you will see that there will either be a stack overflow because the computation requires too much memory, or it will take a VERY long time to compute. I highly recommend trying this on your own computer to see how much longer the second case actually runs.
 
+\medskip\noindent
+In the previous example, I briefly touched upon lazy evaluation supports programming with infinite list, thus in Haskell, we are able to define infinite lists. This is because using lazy evaluation, expressions are only evaluated as much as required to produce the final result. Therefore, when declaring a list that has infinite length, Haskell doesn't actually create or initialize this list. It really defines a potentially infinite list that only evaluates as much as required by the given context \cite{GHutton}. This is because only the specific components of that list that we need will actually be allocated in memory, not the whole thing.
+\begin{figure}[H]
+    \begin{lstlisting}
+Prelude> func x y | x < 10 = x | otherwise = y
+Prelude> a = sum [1,2,3]
+Prelude> b = sum [1..]
+Prelude> func a b
+6
+    \end{lstlisting}
+    \caption{\textit{Output of a Haskell function}}
+\end{figure}
 
-
-
-
-sdf
-
-\section{Project}
-
-In this section you will describe a short project. It can either be in Haskell or of a theoretical nature,
 
 \section{Conclusions}\label{conclusions}
-Short conclusion. 
+Functional languages, on the other hand, have programs that are built solely from function application and evaluation. In languages such as Haskell, everything is an expression, and the goal is to evaluate them in order to solve a problem. Haskell defaults to a method of evaluation known as lazy evaluation. Put simply, Haskell is lazy. It won’t execute functions and calculate things until it’s really forced to show you a result \cite{LYAH}. Haskell uses lazy evaluation to evaluate expressions because it comes with several advantages. 
 
+\begin{itemize}
+    \item Function arguments are not computed before invocation
+    \item Expressions are computed only if their value is necessary and it avoids repeated evaluation of expressions, thus making algorithms more efficient and reducing computation complexity
+    \item Allows the ability to program with infinite lists
+    \item Promises termination when possible  
+
+\end{itemize}
 \begin{thebibliography}{99}
 \bibitem[PL]{PL} \href{https://github.com/alexhkurz/programming-languages-2021/blob/main/README.md}{Programming Languages 2021}, Chapman University, 2021.
 \bibitem[LYAH]{LYAH} \href{http://learnyouahaskell.com/chapters}{Learnyouahaskell.com}
 \bibitem[TP]{TP} \href{https://www.tutorialspoint.com/haskell/haskell_types_and_type_class.htm}{tutorialspoint.com}
+\bibitem[GHutton]{GHutton} \href{https://www.youtube.com/watch?v=R1uBhRK2AKI}{FP 16 - Lazy Evaluation}
 \end{thebibliography}
 
 \end{document}
