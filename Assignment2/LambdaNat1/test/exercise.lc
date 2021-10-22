@@ -1,0 +1,15 @@
+// Uncomment any one of the following lines or paste one of the comments 
+(\x.x) a          
+\x.x a            //echo "\x.x a" | stack exec LambdaNat-exe
+(\x.\y.x) a b     //echo "(\x.\y.x) a b" | stack exec LambdaNat-exe
+(\x.\y.y) a b     //echo "(\x.\y.y) a b" | stack exec LambdaNat-exe
+(\x.\y.x) a b c   //echo "(\x.\y.x) a b c" | stack exec LambdaNat-exe
+(\x.\y.y) a b c   //echo "(\x.\y.y) a b c" | stack exec LambdaNat-exe
+// (\x.\y.x) a (b c) //echo "(\x.\y.x) a (b c)" | stack exec LambdaNat-exe
+// (\x.\y.y) a (b c) //echo "(\x.\y.y) a (b c)" | stack exec LambdaNat-exe
+// (\x.\y.x) (a b) c //echo "(\x.\y.x) (a b) c" | stack exec LambdaNat-exe
+// (\x.\y.y) (a b) c //echo "(\x.\y.y) (a b) c" | stack exec LambdaNat-exe
+// (\x.\y.x) (a b c) //echo "(\x.\y.x) (a b c)" | stack exec LambdaNat-exe
+// (\x.\y.y) (a b c) //echo "(\x.\y.y) (a b c)" | stack exec LambdaNat-exe
+
+// make up your own
