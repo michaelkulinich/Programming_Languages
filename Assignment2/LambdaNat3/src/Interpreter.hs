@@ -29,10 +29,17 @@ evalCBN (EApp e1 e2) = case (evalCBN e1) of
 evalCBN ENat0 = ENat0 
 evalCBN (ENatS e) = ENatS (evalCBN e)
 -- I can't believe this worked
+-- EIf
 evalCBN (EIf e1 e2 e3 e4) =  
     if (evalCBN e1) == (evalCBN e2)
     then (evalCBN e3)
     else (evalCBN e4)
+-- ELet
+evalCBN (ELet i e1 e2) = 
+    evalCBN (subst i e1 e2)
+-- EMinusOne
+evalCBN (EMinusOne e1) = case (evalCBN e1) of
+    (ENatS e2) -> (evalCBN e2)
 
 ----------------------------------------------------
 --- YOUR CODE goes here for extending the interpreter
