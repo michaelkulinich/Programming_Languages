@@ -16,4 +16,20 @@ remove 2 2:3:1:#
 
 ;;
 
+let rec sum = \list. 
+    if (hd list) = (tl list) then 0 else
+        (hd list) +  sum (tl list)
+in
+sum 1:2:3:4:#
+
+;;
+
+let rec prod = \list. 
+    if (tl list) = # then (hd list) else
+        (hd list) *  prod (tl list)
+in
+prod 1:2:#
+
+;;
+
 
