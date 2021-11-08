@@ -49,3 +49,13 @@ in
 map plus_two 1:2:3:# 
 
 ;;
+
+let rec insert = \elem. \list.
+    if list = # then (elem : list)
+    else 
+        if (elem) less_equal (hd list) = 1 then (elem : list) else (hd list) : (insert elem (tl list)) 
+in 
+let rec sort = \list.
+    if list = # then # else insert (hd list) (sort (tl list))
+in
+sort 1:3:4:1:3:5:2:#
