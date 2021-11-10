@@ -1,9 +1,9 @@
 # README
-#### In the critical appraisal explain the results for sum x:2:3:4:# and sum 1:2:3:x:#.
-sum 1 : 2 : 3 : x : #
-	OUTPUT: 1 + (2 + (3 + (x + 0)))
-sum x : 2 : 3 : 4 : #
-	OUTPUT: x + 9 
+#### In the critical appraisal explain the results for sum x : 2 : 3 : 4 : # and sum 1 : 2 : 3 : x : #.
+# sum 1 : 2 : 3 : x : #
+# 	OUTPUT: 1 + (2 + (3 + (x + 0)))
+# sum x : 2 : 3 : 4 : #
+# 	OUTPUT: x + 9 
 	Explanation:The reason for the difference in results from the two expressions is due to the definition of our sum function. We defined sum recursively, by defining that we add the current element with the sum after it. Therefore it goes to the end of the list (creating n recursive calls) then once it sees the Nil character, it begins adding and popping off the stack. In the first example we see this, because it adds the value of the last element, ‘x’ with 0 (the base case for #). Then it keeps adding the previous elements to this sum. In the second example, all the tail elements are successfully added together until we reach x + 9. It doesn’t evaluate x+9 because x is not an integer and the way we defined our interpreter with evalCBN, it will return the same whole expression x + 9.
 
 
