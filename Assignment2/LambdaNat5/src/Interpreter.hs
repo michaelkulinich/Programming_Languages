@@ -14,13 +14,30 @@ evalCBN (EApp e1 e2) = case (evalCBN e1) of
     e3 -> EApp e3 e2
 evalCBN (EIf e1 e2 e3 e4) = if (evalCBN e1) == (evalCBN e2) then evalCBN e3 else evalCBN e4
 evalCBN (ELet i e1 e2) = evalCBN (EApp (EAbs i e2) e1) 
+
 evalCBN (ERec i e1 e2) = evalCBN (EApp (EAbs i e2) (EFix (EAbs i e1)))
-evalCBN (EFix e) = evalCBN (EApp e (EFix e)) 
--- evalCBN ENil 
--- evalCBN (ECons e1 e2) 
--- evalCBN (EHd e) 
--- evalCBN (ETl e) 
--- evalCBN (ELE e1 e2)
+evalCBN (EFix e) = evalCBN (EApp e (EFix e)) -- infinite definition
+--let rec f = \ x . x in f 1
+-- i = f
+-- e1 = \x.x
+-- e2 = f1
+-- Computed
+-- evalCBN (EApp (EAbs f (f 0)) (EFix (EAbs f \x.x)))
+--                              (evalCBN (EApp (EAbs f \x.x) (EFix (EAbs f \x.x))))
+
+
+evalCBN ENil = ENil
+evalCBN (ECons e1 e2) = ECons (evalCBN e1) (evalCBN e2)
+evalCBN (EHd e) = case (evalCBN e) of
+    (ECons e1 e2) -> e1
+    ENil -> ENil -- empty list case??
+evalCBN (ETl e) = case (evalCBN e) of
+    (ECons e1 e2) -> e2
+    ENil -> ENil -- empty list case??
+
+evalCBN (ELE e1 e2)
+    | (evalCBN e1) <= (evalCBN e2) = (EInt 1)
+    | otherwise = (EInt 0)
 evalCBN (EPlus e1 e2) = case (evalCBN e1) of
     (EInt n) -> case (evalCBN e2) of
         (EInt m) -> EInt (n+m)
@@ -73,4 +90,22 @@ subst id s (EPlus e l) = EPlus (subst id s e) (subst id s l)
 subst id s (EMinus e l) = EMinus (subst id s e) (subst id s l)
 subst id s (ETimes e l) = ETimes (subst id s e) (subst id s l)
 -- add the missing cases
+
+-- Ex:  subst (list) by (1:2:#) in (hd list) 
+-- --> hd (subst (list) by (1:2:#) in list)  
+-- -->  hd 1:2:#
+-- -->  1
+subst id s (EHd e) = EHd (subst id s e)
+
+subst id s (ETl e) = ETl (subst id s e)
+
+subst id s (ENil) = ENil
+-- Similar to arithmtic operations
+-- Ex: subst (x) by (3) in (x:#)   
+-- --> ECons (subst (x) by (3) in x) (subst (x) by (3) in #)
+-- --> ECons x #
+-- --> x:#
+subst id s (ECons e1 e2) = ECons (subst id s e1) (subst id s e2)
+
+subst id s (ELE e1 e2) = ELE (subst id s e1) (subst id s e2)
 

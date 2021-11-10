@@ -23,11 +23,11 @@ evalCBN :: Exp -> Exp
 -- in lambda calculus everything is an expression, whether input, program or output
 -- this interpreter only has one computation rule: the beta-reduction of lambda calculus
 -- it uses the substitution function defined in class and also in Haskell below
-evalCBN (EApp e1 e2) = case (evalCBN e1) of   -- ex: (\x. x a) y  -> (\i. e3) e2
+evalCBN (EApp e1 e2) = case (evalCBN e1) of
     (EAbs i e3) -> evalCBN (subst i e2 e3)
-    (ENatS e3) -> ENatS (evalCBN e3)
-    ENat0 -> ENat0
     e3 -> EApp e3 e2
+evalCBN ENat0 = ENat0 
+evalCBN (ENatS e) = ENatS (evalCBN e)
 ----------------------------------------------------
 --- YOUR CODE goes here for extending the interpreter
 ----------------------------------------------------
