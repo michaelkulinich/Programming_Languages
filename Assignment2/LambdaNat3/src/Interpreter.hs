@@ -36,7 +36,7 @@ evalCBN (EIf e1 e2 e3 e4) =
     else (evalCBN e4)
 -- ELet
 evalCBN (ELet i e1 e2) = 
-    evalCBN (subst i e1 e2)
+    evalCBN (EApp (EAbs i e2) e1)
 -- EMinusOne
 evalCBN (EMinusOne e1) = case (evalCBN e1) of
     (ENatS e2) -> (evalCBN e2)
@@ -72,5 +72,8 @@ subst id s (EAbs id1 e1) =
 ----------------------------------------------------------------
 --- YOUR CODE goes here if subst needs to be extended as well
 ----------------------------------------------------------------
+subst id s (EMinusOne e) = EMinusOne (subst id s e)
+subst id s (EIf e1 e2 e3 e4) = EIf (subst id s e1) (subst id s e2) (subst id s e3) (subst id s e4)
+subst id s (ELet i e1 e2) = subst id s (EApp (EAbs i e2) e1)
 subst id s ENat0 = ENat0 
 subst id s (ENatS e) = ENatS (subst id s e)

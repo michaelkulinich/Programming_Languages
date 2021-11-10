@@ -1,5 +1,5 @@
-let rec f = \ n. if n=8 then n else f (n-1) 
-in 
+let rec f = \ n. if n=0 then 0 else f(n-1)
+in
 f 10
 
 ;;
@@ -16,51 +16,3 @@ let rec fib = \ n.
             fib(n-2)+fib(n-1)
 in
 fib 10
-
-;;
-
-hd one:two
-
-;;
-
-hd (one:two:#):#
-
-;;
-
-(hd one:two:#):#
-
-;;
-
-let x = 2 in x + 2
-
-;;
-
-let rec f = \x.x in f 1
-
-;;
-
-(\ list . list) (tl 1 : 2 : 3 : #)
-
-;;
-
-(\list. hd list) 1:2:3:#
-
-
-;;
-
-let list = # in (if (hd list)=tl list then 1 else 0)
-
-;;
-
-(\list. if (hd list)=tl list then 1 else 0) #
-
-;;
-
-(\ x . 1 : x : #) 2
-
-
-;;
-
-(\ x . 1 less_equal x) 2
-
-;;
