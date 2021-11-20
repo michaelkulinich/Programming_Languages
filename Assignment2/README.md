@@ -1,4 +1,5 @@
 # README
+## Michael Kulinich, Titan Mitchell
 #### In the critical appraisal explain the results for sum x : 2 : 3 : 4 : # and sum 1 : 2 : 3 : x : #.
 ##### sum 1 : 2 : 3 : x : #
 ##### 	OUTPUT: 1 + (2 + (3 + (x + 0)))
