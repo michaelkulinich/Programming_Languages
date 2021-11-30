@@ -1,0 +1,37 @@
+-- pattern matching on lists
+rec member = \x.\y. case y of { 
+    [] -> false, 
+    (a:as) -> case x == a of { true -> true, _ -> member x as } };;
+
+
+-- remove matching from lists
+rec remove = \x.\y. case y of {
+    [] -> [],
+    (a:as) -> case x == a of { true -> as, _ -> a: (remove x as) } };;
+
+-- sum of list
+rec sum = \list. case list of {
+    [] -> 0,
+    (a:as) -> a + sum (as) };;
+
+-- prod 
+rec prod = \list. case list of {
+    [] -> 1,
+    (a:as) -> a * prod (as) };;
+
+-- plus 2
+val plustwo = \x. x+2;;
+
+rec map = \func. \list. case list of {
+    [] -> [],
+    (a:as) -> (func a) : (map plustwo as)};;
+
+-- insert and sort
+rec insert = \elem. \list. case list of {
+    [] -> [elem],
+    (a:as) -> case elem <= a of { true -> elem : list, _ -> a : (insert elem as) } };;
+
+-- sort 
+rec sort = \func. \list. case list of {
+    [] -> [],
+    (a:as) -> (func (a) (sort func (as)) )} ;;
