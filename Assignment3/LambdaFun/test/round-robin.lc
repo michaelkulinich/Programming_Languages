@@ -9,9 +9,10 @@ val next = \a.
     head(tail !a);;
 
 
--- val get = \a. 
+val get = \a. 
+    head(!a);;
 
--- val insert = \e. \a. 
+--val insert = \e. \a. 
 
 -- val delete = \a. 
 
