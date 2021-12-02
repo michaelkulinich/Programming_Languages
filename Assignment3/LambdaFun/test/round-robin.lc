@@ -1,19 +1,25 @@
 val newCList = \e.
     let val a = new [] in
     a := [e,a];
-    a;;
+    a
+;;
 
 -- complete the following functions
 
 val next = \a. 
-    head(tail !a);;
+    head(tail !a) 
+;;
 
 
 val get = \a. 
-    head(!a);;
+    head(!a) 
+;;
+
+val update = \e. \a. 
+    a := [e, next a] 
+;;
 
 --val insert = \e. \a. 
 
 -- val delete = \a. 
 
--- val update = \e. \a. 
