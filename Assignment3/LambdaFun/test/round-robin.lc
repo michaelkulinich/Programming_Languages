@@ -19,7 +19,14 @@ val update = \e. \a.
     a := [e, next a] 
 ;;
 
---val insert = \e. \a. 
+val insert = \e. \a.
+    let val b = newCList e in
+    b := [get b,next(a)];
+    a := [get a, b]
+;;
 
--- val delete = \a. 
+
+
+val delete = \a. 
+    a := [get a,head (tail (!(next a)))] ;;
 
