@@ -1,0 +1,172 @@
+-----------
+---STACK---
+-----------
+
+-- This function initializes a stack, and returns the address of the head
+-- initialize two dummy nodes to act as the boundary for the list. This helps reduce edge cases and error checking
+-- also it allows us to abstract the stack and treat it as an "object"
+val newStack = \e.
+    let val nullNode = new [] in
+    let val dummyHead = new [] in
+
+    -- the head of the list is a dummy node
+    dummyHead := ["FRONT", nullNode] ;
+
+    -- initialize null node after a so that delete wont throw error when list is empty
+    nullNode := ["NULL", nullNode];
+    dummyHead
+;;
+
+-- takes in the address of an element and returns the address of the next element
+val next = \a. 
+    head(tail !a) 
+;;
+
+-- takes in the address of an element and returns the value of the element
+val get = \a. 
+    head(!a) 
+;;
+
+-- takes in the address of a stack and returns the value of the top / front element
+val peek = \stack. 
+    head(!(next stack))
+;;
+
+-- takes in a value e and a stack, then appends a new element to the stack 
+val append = \e. \stack.
+    let val b = new [] in
+    b := [e,next(stack)];
+    stack := [get stack, b] 
+;;
+
+-- takes in a stack, removes the top element and returns 
+-- initializes a copy of the element to be removed on the heap
+val pop = \stack. 
+    let val ptr = new [] in
+    ptr := next stack;
+    stack := [get stack,head (tail (!(next stack)))] ;
+    !ptr
+;;
+
+-- takes in a stack, iterates through it and prints the value of each element
+val printStack = \stack.
+
+    -- initialize a pointer that will "move" through the stack.
+    let val ptr = new [] in 
+    ptr := next stack;
+    while (get (!ptr)) != "NULL" do 
+
+        -- print the value of the element at the current address, then update ptr to point to next element
+        (println (get (!ptr)); ptr := next (!ptr) ) 
+;;
+
+-----------
+--- BST ---
+-----------
+
+-- now make bst
+-- initializes a bst node and returns the address of that node
+val bstNode = \e.
+
+    -- a node consists of a value, leftchild node, and rightchild node
+    let val node = new [] in
+    node := [e,"NULL", "NULL"];
+    node
+;;
+
+-- takes in a address to a node and returns its value
+val nodeVal = \node.
+    head(!node)
+    ;;
+
+-- takes in a address to a node and returns its left child
+val leftChild = \node.
+    (head (tail(!node)))
+;;
+
+-- takes in a address to a node and returns its right child
+val rightChild = \node.
+    (head (tail(tail(!node)))) 
+;;
+
+-- takes in a value e and bstnode root. It inserts into the tree starting at the root position
+val insertNode = \e. \root.
+    -- node that we are inserting
+    let val node = bstNode e in 
+
+    -- a pointer that will move through the tree inorder to find the correct position to insert the node
+    let val currPtr = new [] in -- curr is just a pointer
+
+    -- a boolean flag that will be used as the condition to end the while loop once the node is inserted into the tree
+    let val flag = new [] in
+    flag := true;
+    currPtr := root; -- starts pointing to the address of root
+    node := [nodeVal node, leftChild node, rightChild node] ; 
+    while !flag == true do 
+
+        -- if the value we want to insert is less than the current nodes value, then we should insert into 
+        -- the "left subtree", otherwise the value is greater_than_equal so we insert into "right subtree"
+        case (e < (nodeVal (!currPtr))) of {
+
+            -- if the current node is a leaf node, then we can insert into this position
+            -- else, we continue iterating through the "left subtree"
+            true -> case (leftChild (!currPtr)) == "NULL" of {
+                -- we found where we should insert
+                true -> (flag := false ; (!currPtr) := [nodeVal (!currPtr), node ,rightChild (!currPtr) ]),
+
+                -- we havent found our spot, keep interating through left
+                false -> currPtr := leftChild (!currPtr) 
+            },
+
+            -- if the current node is a leaf node, then we can insert into this position
+            -- else, we continue iterating through the "right subtree"
+            false -> case (rightChild (!currPtr)) == "NULL" of {
+                true -> (flag := false ; (!currPtr) := [nodeVal (!currPtr), leftChild (!currPtr), node]),
+                false ->  currPtr := rightChild (!currPtr) 
+            }
+        } 
+;;
+
+----------------------
+--PREORDER TRAVERSAL--
+----------------------
+
+
+-- takes in a root position node and prints the tree in a preorder traversal using a stack
+val preorderTraverse = \root.
+
+    -- a pointer that will iterates through the nodes in the tree
+    let val ptr = new [] in
+
+    -- the stack that we will use to create a preorder traversal
+    let val stack = newStack e in 
+    stack ;
+    ptr := root ;
+
+    -- when you insert root into the stack
+    -- it creates a new list element in the stack with
+    -- [address of root node, address of the next element in stack list]
+    append root stack ;
+
+    -- while the stack is not empty, we need to print the elements
+    while (peek stack) != "NULL" do
+        (
+            ptr := (pop stack) ;
+
+            -- head (! ! ptr); gets the address of the inserted bst node
+            -- then nodeval returns the value of that bst node
+            println (nodeVal (head (! !ptr))) ;
+
+            -- if the right child is a bstnode, then we must append it to stack otherwise dont do anything
+            case (rightChild (head (! ! ptr))) != "NULL" of {
+                true -> (append (rightChild (head (! ! ptr))) stack),
+                _ -> true -- dont do anyting
+            } ;
+
+            -- if the left child is a bstnode, then we must append it to stack otherwise dont do anything
+            case (leftChild (head (! ! ptr))) != "NULL" of {
+                true -> (append (leftChild (head (! ! ptr))) stack),
+                _ -> true -- dont do anyting
+            } 
+        ) 
+;;
