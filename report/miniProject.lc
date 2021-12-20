@@ -29,7 +29,7 @@ val get = \a.
 
 -- takes in the address of a stack and returns the value of the top / front element
 val peek = \stack. 
-    head(!(next stack))
+    get(next stack)
 ;;
 
 -- takes in a value e and a stack, then appends a new element to the stack 
@@ -101,7 +101,9 @@ val insertNode = \e. \root.
     let val flag = new [] in
     flag := true;
     currPtr := root; -- starts pointing to the address of root
-    node := [nodeVal node, leftChild node, rightChild node] ; 
+    node := [nodeVal node, leftChild node, rightChild node] ; -- same as  [e, "NULL","NULL"]
+    
+    -- keep iterating untill we have successfully inserted the node
     while !flag == true do 
 
         -- if the value we want to insert is less than the current nodes value, then we should insert into 
@@ -148,12 +150,13 @@ val preorderTraverse = \root.
     -- [address of root node, address of the next element in stack list]
     append root stack ;
 
-    -- while the stack is not empty, we need to print the elements
+    -- while the stack is not empty, we need to continue printing the elements
     while (peek stack) != "NULL" do
         (
+            -- ptr's memory address now holds the address of the popped element
             ptr := (pop stack) ;
 
-            -- head (! ! ptr); gets the address of the inserted bst node
+            -- head (! ! ptr); gets the address of the inserted bst node from the popped element
             -- then nodeval returns the value of that bst node
             println (nodeVal (head (! !ptr))) ;
 
